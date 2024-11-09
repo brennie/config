@@ -1,3 +1,5 @@
+hostname := `hostname`
+
 default:
     @just --list
 
@@ -9,8 +11,11 @@ uninstall-dotfiles:
     [[ "{{ os() }}" = "macos" ]] && stow -t ~ -d dotfiles/layers/macOS -D .
     stow -t ~ -d dotfiles/layers/base -D .
 
-darwin-rebuild:
-    darwin-rebuild switch --flake ./nixpkgs#vixen
+darwin-rebuild HOST=hostname:
+    cd nix/hosts/{{ HOST }} && darwin-rebuild switch --flake .#{{ HOST }}
 
-nix-flake-update:
-    cd nixpkgs && env NIX_CONFIG="access-tokens = github.com=`op item get gh-token-nix --fields password --reveal`" nix flake update
+home-manager-switch HOST=hostname:
+    cd nix/hosts/{{ HOST }} && home-manager switch --flake .#{{ HOST }}
+
+nix-flake-update HOST=hostname:
+    cd nix/hosts/{{ HOST }} && env NIX_CONFIG="access-tokens = github.com=`op item get gh-token-nix --fields password --reveal`" nix flake update
